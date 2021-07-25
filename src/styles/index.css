@@ -3,12 +3,6 @@
   padding: 0;
 }
 
-html,
-body {
-  overflow: hidden;
-  font-family: Arial, Helvetica, Arial, sans-serif;
-}
-
 canvas {
   display: block;
 }
@@ -16,5 +10,5 @@ canvas {
 #container {
   height: 100vh;
   width: 100vw;
-  background-color: rgb(27, 27, 31);
+  background: #ccc;
 }

@@ -2,6 +2,7 @@ import '../styles/index.css'
 
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import * as dat from 'dat.gui'
 
 // import fragmentShader from '../shaders/experiments/fragment.glsl'
 // import vertexShader from '../shaders/experiments/vertex.glsl'
@@ -31,50 +32,71 @@ export default class Demo {
 
     this.scene = new THREE.Scene()
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
-    this.renderer.setSize(this.width, this.height)
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: true,
+    })
+    this.renderer.setPixelRatio(window.devicePixelRatio)
+    // this.renderer.setPixelRatio(2);
     this.container.appendChild(this.renderer.domElement)
-
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
+    this.setupSettings()
+    this.resize()
     this.addObjects()
-    this.setupResize()
     this.render()
+
+    this.setupResize()
+  }
+
+  setupSettings() {
+    this.settings = {
+      progress: 0,
+    }
+    this.gui = new dat.GUI()
+    this.gui.add(this.settings, 'progress').min(0).max(1).step(0.001)
   }
 
   resize() {
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight
-
+    this.renderer.setSize(this.width, this.height)
     this.camera.aspect = this.width / this.height
     this.camera.updateProjectionMatrix()
-
-    this.renderer.setSize(this.width, this.height)
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
   }
 
   setupResize() {
-    window.addEventListener('resize', this.resize.bind(this), false)
+    window.addEventListener('resize', this.resize.bind(this))
   }
 
   addObjects() {
-    this.geometry = new THREE.PlaneBufferGeometry(350, 350, 100, 100)
+    const gWidth = 300
+    const gHeight = 300
+
+    this.geometry = new THREE.PlaneBufferGeometry(gWidth, gHeight, 100, 100)
     this.material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
       wireframe: false,
       uniforms: {
         uTime: { value: 1.0 },
-        uResolution: { value: new THREE.Vector2() },
+        uProgress: { value: 1.0 },
         uTexture: {
-          value: new THREE.TextureLoader().load('/images/water.jpg'),
+          value: new THREE.TextureLoader().load('/images/texture.jpg'),
         },
+        uTextureSize: {
+          value: new THREE.Vector2(100, 100),
+        },
+        uResolution: { value: new THREE.Vector2(this.width, this.height) },
+        uQuadSize: { value: new THREE.Vector2(gWidth, gHeight) },
       },
     })
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
+
+    this.mesh.position.x = 300
+    this.mesh.rotation.z = 0.5
+    // this.mesh.scale.set(2.0, 1, 1)
   }
 
   render() {
@@ -86,6 +108,7 @@ export default class Demo {
 
     // Update material
     this.material.uniforms.uTime.value = this.time
+    this.material.uniforms.uProgress.value = this.settings.progress
 
     this.renderer.render(this.scene, this.camera)
 
@@ -93,9 +116,6 @@ export default class Demo {
   }
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-  const demo = new Demo({
-    domElement: document.getElementById('container'),
-  })
-  window.demo = demo
+new Demo({
+  domElement: document.getElementById('container'),
 })
