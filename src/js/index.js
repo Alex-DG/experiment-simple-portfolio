@@ -3,10 +3,10 @@ import '../styles/index.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
-import fragmentShader from '../shaders/experiments/fragment.glsl'
-import vertexShader from '../shaders/experiments/vertex.glsl'
-
-// import testTexture from '../../static/images/texture.jpg'
+// import fragmentShader from '../shaders/experiments/fragment.glsl'
+// import vertexShader from '../shaders/experiments/vertex.glsl'
+import fragmentShader from '../shaders/portfolio/fragment.glsl'
+import vertexShader from '../shaders/portfolio/vertex.glsl'
 
 export default class Demo {
   constructor(options) {
@@ -16,13 +16,18 @@ export default class Demo {
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight
 
+    const cameraDistance = 600
     this.camera = new THREE.PerspectiveCamera(
       70,
       this.width / this.height,
-      0.01,
-      10
+      10,
+      1000
     )
-    this.camera.position.z = 1
+    this.camera.position.z = cameraDistance
+
+    // Update camera fov to be able to input values in the geometry which match the actual screen size
+    this.camera.fov =
+      2 * Math.atan(this.height / 2 / cameraDistance) * (180 / Math.PI) //  (180 / Math.PI) => transform angle in degres
 
     this.scene = new THREE.Scene()
 
@@ -55,7 +60,7 @@ export default class Demo {
   }
 
   addObjects() {
-    this.geometry = new THREE.SphereBufferGeometry(0.5, 160, 160)
+    this.geometry = new THREE.PlaneBufferGeometry(350, 350, 100, 100)
     this.material = new THREE.ShaderMaterial({
       vertexShader,
       fragmentShader,
@@ -74,6 +79,8 @@ export default class Demo {
 
   render() {
     this.time = this.clock.getElapsedTime()
+
+    // Update mesh
     // this.mesh.rotation.x = this.time * 0.5
     // this.mesh.rotation.y = this.time * 0.5
 
