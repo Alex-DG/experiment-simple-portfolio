@@ -1,5 +1,3 @@
-import '../styles/index.css'
-
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
@@ -14,8 +12,21 @@ export default class Demo {
     this.clock = new THREE.Clock()
 
     this.container = options.domElement
+
+    console.log({
+      clientWidth: this.container.clientWidth,
+      clienHeight: this.container.clientHeight,
+      container: this.container,
+      offsetWidth: this.container.offsetWidth,
+      offsetHeight: this.container.offsetHeight,
+      innerHeight: window.innerHeight,
+      display: this.container.display,
+      visibility: this.container.visibility,
+    })
     this.width = this.container.offsetWidth
-    this.height = this.container.offsetHeight
+    this.height = this.container.offsetHeight || window.innerHeight
+
+    console.log({ width: this.width, height: this.height })
 
     const cameraDistance = 600
     this.camera = new THREE.PerspectiveCamera(
@@ -36,9 +47,10 @@ export default class Demo {
       antialias: true,
       alpha: true,
     })
-    this.renderer.setPixelRatio(window.devicePixelRatio)
-    // this.renderer.setPixelRatio(2);
+    this.renderer.setSize(this.width, this.height)
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     this.container.appendChild(this.renderer.domElement)
+
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
     this.setupSettings()
@@ -60,9 +72,13 @@ export default class Demo {
   resize() {
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight
-    this.renderer.setSize(this.width, this.height)
+
+    // Update camera
     this.camera.aspect = this.width / this.height
     this.camera.updateProjectionMatrix()
+
+    // Update renderer
+    this.renderer.setSize(this.width, this.height)
   }
 
   setupResize() {
@@ -116,6 +132,11 @@ export default class Demo {
   }
 }
 
-new Demo({
-  domElement: document.getElementById('container'),
+window.addEventListener('DOMContentLoaded', () => {
+  var myelement = document.getElementById('container')
+  myelement.width = '100%'
+  myelement.height = '100%'
+  new Demo({
+    domElement: myelement,
+  })
 })
