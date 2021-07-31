@@ -4,10 +4,8 @@ import * as dat from 'dat.gui'
 import gsap from 'gsap'
 import ASScroll from '@ashthornton/asscroll'
 
-// import fragmentShader from '../../shaders/experiments/fragment.glsl'
-// import vertexShader from '../../shaders/experiments/vertex.glsl'
-import fragmentShader from '../../shaders/experiments2/fragment.glsl'
-import vertexShader from '../../shaders/experiments2/vertex.glsl'
+import fragmentShader from '../../shaders/portfolio/fragment.glsl'
+import vertexShader from '../../shaders/portfolio/vertex.glsl'
 
 // Images
 import texture from '../../assets/images/texture.jpg'
@@ -20,8 +18,6 @@ export default class Experience {
 
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight || window.innerHeight
-
-    console.log({ width: this.width, height: this.height })
 
     const cameraDistance = 600
     this.camera = new THREE.PerspectiveCamera(
@@ -89,10 +85,7 @@ export default class Experience {
   }
 
   addObjects() {
-    const gWidth = 300
-    const gHeight = 300
-
-    this.geometry = new THREE.PlaneBufferGeometry(gWidth, gHeight, 100, 100)
+    this.geometry = new THREE.PlaneBufferGeometry(1, 1, 100, 100)
     this.material = new THREE.ShaderMaterial({
       // wireframe: false,
       uniforms: {
@@ -106,7 +99,7 @@ export default class Experience {
         },
         uCorners: { value: new THREE.Vector4(0, 0, 0, 0) },
         uResolution: { value: new THREE.Vector2(this.width, this.height) },
-        uQuadSize: { value: new THREE.Vector2(gWidth, gHeight) },
+        uQuadSize: { value: new THREE.Vector2(300, 300) },
       },
       vertexShader,
       fragmentShader,
@@ -145,10 +138,36 @@ export default class Experience {
       )
 
     this.mesh = new THREE.Mesh(this.geometry, this.material)
-    this.scene.add(this.mesh)
+    this.mesh.scale.set(300, 300, 1)
+    // this.scene.add(this.mesh)
     this.mesh.position.x = 300
-    // this.mesh.rotation.z = 0.5
-    // this.mesh.scale.set(2.0, 1, 1)
+
+    this.images = [...document.querySelectorAll('.js-image')]
+    this.materials = []
+    this.imageStore = this.images.map((img) => {
+      let bounds = img.getBoundingClientRect()
+
+      let m = this.material.clone()
+      this.materials.push(m)
+
+      let texture = new THREE.Texture(img)
+      texture.needsUpdate = true
+
+      m.uniforms.uTexture.value = texture
+
+      let mesh = new THREE.Mesh(this.geometry, m)
+      this.scene.add(mesh)
+      mesh.scale.set(bounds.width, bounds.height, 1)
+
+      return {
+        img,
+        mesh,
+        width: bounds.width,
+        height: bounds.height,
+        top: bounds.top,
+        left: bounds.left,
+      }
+    })
   }
 
   render() {
