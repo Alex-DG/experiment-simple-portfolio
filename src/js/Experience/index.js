@@ -19,18 +19,18 @@ export default class Experience {
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight || window.innerHeight
 
-    const cameraDistance = 600
+    this.cameraDistance = 600
     this.camera = new THREE.PerspectiveCamera(
       70,
       this.width / this.height,
       10,
       1000
     )
-    this.camera.position.z = cameraDistance
+    this.camera.position.z = this.cameraDistance
 
     // Update camera fov to be able to input values in the geometry which match the actual screen size
     this.camera.fov =
-      2 * Math.atan(this.height / 2 / cameraDistance) * (180 / Math.PI) //  (180 / Math.PI) => transform angle in degres
+      2 * Math.atan(this.height / 2 / this.cameraDistance) * (180 / Math.PI) //  (180 / Math.PI) => transform angle in degres
 
     this.scene = new THREE.Scene()
 
@@ -44,7 +44,11 @@ export default class Experience {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
 
-    this.asscroll = new ASScroll()
+    this.materials = []
+
+    this.asscroll = new ASScroll({
+      disableRaf: true,
+    })
 
     this.asscroll.enable({
       horizontalScroll: true,
@@ -53,8 +57,8 @@ export default class Experience {
     this.time = 0
 
     this.setupSettings()
-    this.resize()
     this.addObjects()
+    this.resize()
     this.render()
 
     this.setupResize()
@@ -78,6 +82,32 @@ export default class Experience {
 
     // Update renderer
     this.renderer.setSize(this.width, this.height)
+
+    // Update fov
+    this.camera.fov =
+      2 * Math.atan(this.height / 2 / this.cameraDistance) * (180 / Math.PI)
+
+    // Update material
+    this.materials.forEach((m) => {
+      m.uniforms.uResolution.value.x = this.width
+      m.uniforms.uResolution.value.y = this.height
+    })
+
+    this.imageStore.forEach(({ img, mesh, ...item }) => {
+      const { width, height, top, left } = img.getBoundingClientRect()
+      mesh.scale.set(width, height, 1)
+
+      item.top = top
+      item.left = left + this.asscroll.currentPos
+      item.width = width
+      item.height = height
+
+      mesh.material.uniforms.uQuadSize.value.x = width
+      mesh.material.uniforms.uQuadSize.value.y = height
+
+      mesh.material.uniforms.uTextureSize.value.x = width
+      mesh.material.uniforms.uTextureSize.value.y = height
+    })
   }
 
   setupResize() {
@@ -143,7 +173,6 @@ export default class Experience {
     this.mesh.position.x = 300
 
     this.images = [...document.querySelectorAll('.js-image')]
-    this.materials = []
     this.imageStore = this.images.map((img) => {
       let bounds = img.getBoundingClientRect()
 
@@ -181,6 +210,8 @@ export default class Experience {
   render() {
     this.time = this.clock.getElapsedTime()
 
+    // Update scroll
+    this.asscroll.update()
     // Update images position
     this.setPosition()
 
