@@ -5,8 +5,8 @@ import gsap from 'gsap'
 
 // import fragmentShader from '../../shaders/experiments/fragment.glsl'
 // import vertexShader from '../../shaders/experiments/vertex.glsl'
-import fragmentShader from '../../shaders/portfolio/fragment.glsl'
-import vertexShader from '../../shaders/portfolio/vertex.glsl'
+import fragmentShader from '../../shaders/experiments2/fragment.glsl'
+import vertexShader from '../../shaders/experiments2/vertex.glsl'
 
 export default class Experience {
   constructor(options) {
@@ -135,7 +135,7 @@ export default class Experience {
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
     this.mesh.position.x = 300
-    this.mesh.rotation.z = 0.5
+    // this.mesh.rotation.z = 0.5
     // this.mesh.scale.set(2.0, 1, 1)
   }
 
@@ -144,10 +144,10 @@ export default class Experience {
 
     // Update material
     this.material.uniforms.uTime.value = this.time
-    // this.material.uniforms.uProgress.value = this.settings.progress
+    this.material.uniforms.uProgress.value = this.settings.progress
 
     // Update timeline
-    this.tl.progress(this.settings.progress)
+    // this.tl.progress(this.settings.progress)
 
     // Update mesh
     this.mesh.rotation.x = this.time / 2000
