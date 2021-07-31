@@ -2,11 +2,15 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import gsap from 'gsap'
+import ASScroll from '@ashthornton/asscroll'
 
 // import fragmentShader from '../../shaders/experiments/fragment.glsl'
 // import vertexShader from '../../shaders/experiments/vertex.glsl'
 import fragmentShader from '../../shaders/experiments2/fragment.glsl'
 import vertexShader from '../../shaders/experiments2/vertex.glsl'
+
+// Images
+import texture from '../../assets/images/texture.jpg'
 
 export default class Experience {
   constructor(options) {
@@ -43,6 +47,14 @@ export default class Experience {
     this.container.appendChild(this.renderer.domElement)
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement)
+
+    this.asscroll = new ASScroll()
+
+    this.asscroll.enable({
+      horizontalScroll: true,
+    })
+
+    this.time = 0
 
     this.setupSettings()
     this.resize()
@@ -87,7 +99,7 @@ export default class Experience {
         uTime: { value: 1.0 },
         uProgress: { value: 0.0 },
         uTexture: {
-          value: new THREE.TextureLoader().load('/images/texture.jpg'),
+          value: new THREE.TextureLoader().load(texture),
         },
         uTextureSize: {
           value: new THREE.Vector2(100, 100),
