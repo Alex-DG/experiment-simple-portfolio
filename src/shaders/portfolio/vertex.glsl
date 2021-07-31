@@ -3,6 +3,7 @@ uniform float uProgress;
 uniform vec2 uResolution;
 uniform vec2 uQuadSize;
 uniform vec2 uTextureSize;
+uniform vec4 uCorners;
 uniform sampler2D uTexture;
 
 varying vec2 vUv;
@@ -16,7 +17,14 @@ void main()
     fullScreenState.x *= uResolution.x / uQuadSize.x;
     fullScreenState.y *= uResolution.y / uQuadSize.y;
 
-    vec4 finalState = mix(defaultState, fullScreenState, uProgress);
+    // Effect with corners
+    float cornersProgress =mix(
+        mix(uCorners.x, uCorners.y, uv.x),
+        mix(uCorners.z, uCorners.w, uv.x),
+        uv.y
+    );
+
+    vec4 finalState = mix(defaultState, fullScreenState, cornersProgress);
 
     vSize = mix(uQuadSize, uResolution, uProgress);
 

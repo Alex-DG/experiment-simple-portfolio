@@ -1,8 +1,7 @@
-// import '../styles/index.css'
-
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import gsap from 'gsap'
 
 // import fragmentShader from '../../shaders/experiments/fragment.glsl'
 // import vertexShader from '../../shaders/experiments/vertex.glsl'
@@ -15,16 +14,6 @@ export default class Experience {
 
     this.container = options.domElement
 
-    console.log({
-      clientWidth: this.container.clientWidth,
-      clienHeight: this.container.clientHeight,
-      container: this.container,
-      offsetWidth: this.container.offsetWidth,
-      offsetHeight: this.container.offsetHeight,
-      innerHeight: window.innerHeight,
-      display: this.container.display,
-      visibility: this.container.visibility,
-    })
     this.width = this.container.offsetWidth
     this.height = this.container.offsetHeight || window.innerHeight
 
@@ -93,25 +82,58 @@ export default class Experience {
 
     this.geometry = new THREE.PlaneBufferGeometry(gWidth, gHeight, 100, 100)
     this.material = new THREE.ShaderMaterial({
-      vertexShader,
-      fragmentShader,
-      wireframe: false,
+      // wireframe: false,
       uniforms: {
         uTime: { value: 1.0 },
-        uProgress: { value: 1.0 },
+        uProgress: { value: 0.0 },
         uTexture: {
           value: new THREE.TextureLoader().load('/images/texture.jpg'),
         },
         uTextureSize: {
           value: new THREE.Vector2(100, 100),
         },
+        uCorners: { value: new THREE.Vector4(0, 0, 0, 0) },
         uResolution: { value: new THREE.Vector2(this.width, this.height) },
         uQuadSize: { value: new THREE.Vector2(gWidth, gHeight) },
       },
+      vertexShader,
+      fragmentShader,
     })
+
+    // Setup new timeline
+    this.tl = gsap
+      .timeline()
+      .to(this.material.uniforms.uCorners.value, {
+        x: 1,
+        duration: 1,
+      })
+      .to(
+        this.material.uniforms.uCorners.value,
+        {
+          y: 1,
+          duration: 1,
+        },
+        0.2
+      )
+      .to(
+        this.material.uniforms.uCorners.value,
+        {
+          z: 1,
+          duration: 1,
+        },
+        0.4
+      )
+      .to(
+        this.material.uniforms.uCorners.value,
+        {
+          w: 1,
+          duration: 1,
+        },
+        0.6
+      )
+
     this.mesh = new THREE.Mesh(this.geometry, this.material)
     this.scene.add(this.mesh)
-
     this.mesh.position.x = 300
     this.mesh.rotation.z = 0.5
     // this.mesh.scale.set(2.0, 1, 1)
@@ -120,23 +142,19 @@ export default class Experience {
   render() {
     this.time = this.clock.getElapsedTime()
 
-    // Update mesh
-    // this.mesh.rotation.x = this.time * 0.5
-    // this.mesh.rotation.y = this.time * 0.5
-
     // Update material
     this.material.uniforms.uTime.value = this.time
-    this.material.uniforms.uProgress.value = this.settings.progress
+    // this.material.uniforms.uProgress.value = this.settings.progress
+
+    // Update timeline
+    this.tl.progress(this.settings.progress)
+
+    // Update mesh
+    this.mesh.rotation.x = this.time / 2000
+    this.mesh.rotation.y = this.time / 1000
 
     this.renderer.render(this.scene, this.camera)
 
     this.renderer.setAnimationLoop(this.render.bind(this))
   }
 }
-
-// window.addEventListener('DOMContentLoaded', () => {
-//   const container = document.getElementById('container')
-//   new Demo({
-//     domElement: container,
-//   })
-// })
