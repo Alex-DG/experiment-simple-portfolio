@@ -170,8 +170,19 @@ export default class Experience {
     })
   }
 
+  setPosition() {
+    this.imageStore.forEach((o) => {
+      o.mesh.position.x =
+        -this.asscroll.currentPos + o.left - this.width / 2 + o.width / 2
+      o.mesh.position.y = -o.top + this.height / 2 - o.height / 2
+    })
+  }
+
   render() {
     this.time = this.clock.getElapsedTime()
+
+    // Update images position
+    this.setPosition()
 
     // Update material
     this.material.uniforms.uTime.value = this.time
